@@ -1,8 +1,11 @@
 import 'package:flutter/widgets.dart';
 import 'package:flutter/material.dart'
-    show CardTheme, Material, MaterialType, Theme, Colors;
+    show Brightness, CardTheme, Material, Theme;
 
-/// A Neumorphic design material card.
+import 'base.dart';
+import 'constants.dart';
+
+/// A Neumorphic design based material card.
 ///
 /// A card is a sheet of [Material] used to represent some related information,
 /// for example an album, a geographical location, a meal, contact details, etc.
@@ -11,12 +14,10 @@ class Card extends StatelessWidget {
   ///
   /// Compatible with Material Card.
   ///
-  /// The [elevation] must be null or non-negative. The [borderOnForeground]
-  /// must not be null.
+  /// The [borderOnForeground] must not be null.
   const Card({
     Key key,
-    this.color, //= nSurfaceColor,
-    this.elevation,
+    this.color,
     this.shape,
     this.surface = SurfaceShape.concave,
     this.lightSource,
@@ -26,8 +27,7 @@ class Card extends StatelessWidget {
     this.child,
     this.allowGradient = true,
     this.semanticContainer = true,
-  })  : assert(elevation == null || elevation >= 0.0),
-        assert(borderOnForeground != null),
+  })  : assert(borderOnForeground != null),
         super(key: key);
 
   /// The card's background color.
@@ -41,15 +41,6 @@ class Card extends StatelessWidget {
   /// Applies gradient effect when true.
   /// Default is true.
   final bool allowGradient;
-
-  /// The z-coordinate at which to place this card. This controls the size of
-  /// the shadow below the card.
-  ///
-  /// Defines the card's [Material.elevation].
-  ///
-  /// If this property is null then [ThemeData.cardTheme.elevation] is used,
-  /// if that's null, the default value is 1.0.
-  final double elevation;
 
   /// The shape of the card's [Material].
   ///
@@ -113,32 +104,57 @@ class Card extends StatelessWidget {
   /// {@macro flutter.widgets.child}
   final Widget child;
 
-  static const double _defaultElevation = 1.0;
-
   @override
   Widget build(BuildContext context) {
+    // Checks if dark theme is enabled for application.
+    // Instead of checking platform's brightness using
+    // MediaQuery.of(context).platformBrightness, Theme's brightness is used
+    // If material is dark
+    bool _isDarkThemeOn = false;
+    if (Theme.of(context).brightness == Brightness.dark) _isDarkThemeOn = true;
+
+    // Assigns `SurfaceShape.concave` if surface is provided null
+    SurfaceShape surface = this.surface ?? SurfaceShape.concave;
+
+    bool isConcave = (surface != SurfaceShape.convex);
+
     final CardTheme cardTheme = CardTheme.of(context);
-    final Color nColor = color ?? Theme.of(context).cardColor;
+    final Color mainCardColor = color ?? Theme.of(context).cardColor;
+
     final double blurRadius = 12;
     final double blurOffset = blurRadius / 2;
-    Color lightShade = Color.lerp(nColor, nLightColor, 0.6);
-    Color darkShade = Color.lerp(nColor, nDarkColor, 0.3);
-    Color lightGradient = Color.lerp(nColor, nLightColor, 0.1);
-    Color darkGradient = Color.lerp(nColor, nDarkColor, 0.5);
+
+    // Mixing colors with mainCardColor to obtain proper shades & gradients
+    // Didn't use dart extensions to make this code compatible with dart 2.2 & above
+    Color lightShade = Color.lerp(mainCardColor, cLightColor, 0.6);
+    Color darkShade = Color.lerp(mainCardColor, cDarkColor, 0.3);
+    Color lightGradient = Color.lerp(mainCardColor, cLightColor, 0.1);
+    Color darkGradient = Color.lerp(mainCardColor, cDarkColor, 0.5);
     bool isLightOnTop = (lightSource == LightSource.topLeft ||
         lightSource == LightSource.topRight);
-    bool isConcave = (surface != SurfaceShape.convex);
-    Color topShade, bottomShade, topGradient = nColor, bottomGradient = nColor;
+
+    Color topShade,
+        bottomShade,
+        topGradient = mainCardColor,
+        bottomGradient = mainCardColor;
+
+    // Handling how and where will light and dark effects should happen
+    // depending upon Surface & Position of light source.
     if (isLightOnTop) {
-      topShade = lightShade;
-      bottomShade = darkShade;
+      if (!_isDarkThemeOn) {
+        topShade = lightShade;
+        bottomShade = darkShade;
+      }
+
       if (allowGradient) {
         topGradient = isConcave ? lightGradient : darkGradient;
         bottomGradient = isConcave ? darkGradient : lightGradient;
       }
     } else {
-      topShade = darkShade;
-      bottomShade = lightShade;
+      if (!_isDarkThemeOn) {
+        topShade = darkShade;
+        bottomShade = lightShade;
+      }
       if (allowGradient) {
         topGradient = isConcave ? darkGradient : lightGradient;
         bottomGradient = isConcave ? lightGradient : darkGradient;
@@ -153,33 +169,38 @@ class Card extends StatelessWidget {
           borderRadius: BorderRadius.all(Radius.circular(4.0)),
           border: Border.all(
             width: 0.1,
-            color: nColor.withAlpha(51),
+            color: mainCardColor.withAlpha(51),
           ),
-          boxShadow: [
-            BoxShadow(
-              color: topShade,
-              blurRadius: blurRadius, // has the effect of softening the shadow
-              // spreadRadius: -12.0, // has the effect of extending the shadow
-              offset: Offset(
-                -blurOffset, // horizontal, move right -6
-                -blurOffset, // vertical, move down -6
-              ),
-            ),
-            BoxShadow(
-              color: bottomShade,
-              blurRadius: blurRadius, // has the effect of softening the shadow
-              // spreadRadius: -12.0, // has the effect of extending the shadow
-              offset: Offset(
-                blurOffset, // horizontal, move right -6
-                blurOffset, // vertical, move down -6
-              ),
-            )
-          ],
+          // Show box shadows only if `dark theme` is `off`
+          boxShadow: _isDarkThemeOn
+              ? null
+              : [
+                  BoxShadow(
+                    color: topShade,
+                    blurRadius:
+                        blurRadius, // has the effect of softening the shadow
+                    // spreadRadius: -12.0, // has the effect of extending the shadow
+                    offset: Offset(
+                      -blurOffset, // horizontal, move right -6
+                      -blurOffset, // vertical, move down -6
+                    ),
+                  ),
+                  BoxShadow(
+                    color: bottomShade,
+                    blurRadius:
+                        blurRadius, // has the effect of softening the shadow
+                    // spreadRadius: -12.0, // has the effect of extending the shadow
+                    offset: Offset(
+                      blurOffset, // horizontal, move right -6
+                      blurOffset, // vertical, move down -6
+                    ),
+                  )
+                ],
           gradient: allowGradient
               ? LinearGradient(
                   colors: [
                       topGradient,
-                      nColor,
+                      mainCardColor,
                       bottomGradient,
                     ],
                   stops: [
@@ -200,13 +221,3 @@ class Card extends StatelessWidget {
     );
   }
 }
-
-enum LightSource { topLeft, topRight, bottomLeft, bottomRight }
-
-enum SurfaceShape { convex, concave }
-
-const Color nLightColor = Color(0xffffffff);
-
-const Color nDarkColor = Color(0xffd1cdc7);
-
-const Color nSurfaceColor = Color(0xffefeeee);
