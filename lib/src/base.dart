@@ -21,13 +21,6 @@ HSVColor x(a, b, t) {
     lerpDouble(a.saturation, b.saturation, t).clamp(0.0, 1.0),
     lerpDouble(a.value, b.value, t).clamp(0.0, 1.0),
   );
-
-  var x = Color.fromARGB(
-    lerpDouble(a.alpha, b.alpha, t).toInt().clamp(0, 255),
-    lerpDouble(a.red, b.red, t).toInt().clamp(0, 255),
-    lerpDouble(a.green, b.green, t).toInt().clamp(0, 255),
-    lerpDouble(a.blue, b.blue, t).toInt().clamp(0, 255),
-  );
 }
 
 int toIntByte(double x) {
@@ -69,13 +62,3 @@ Color fromHSVtoRGB(double h, double s, double v, {double a = 255}) {
       return Color.fromARGB(ax, vx, vx, vx);
   }
 }
-//  def hsv_to_rgb(h, s, v):
-//       if s == 0.0: return (v, v, v)
-//       i = int(h*6.) # XXX assume int() truncates!
-//       f = (h*6.)-i; p,q,t = v*(1.-s), v*(1.-s*f), v*(1.-s*(1.-f)); i%=6
-//       if i == 0: return (v, t, p)
-//       if i == 1: return (q, v, p)
-//       if i == 2: return (p, v, t)
-//       if i == 3: return (p, q, v)
-//       if i == 4: return (t, p, v)
-//       if i == 5: return (v, p, q)
