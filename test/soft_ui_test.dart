@@ -24,6 +24,7 @@ void main() {
     print(
         "ahsv: ${hColor.alpha} ${hColor.hue} ${hColor.saturation} ${hColor.value}");
     Color res = fromHSVtoColor(hColor);
-    expect("${res.alpha} ${res.red} ${res.green} ${res.blue}", "${tColor.alpha} ${tColor.red} ${tColor.green} ${tColor.blue}");
+    expect("${res.alpha} ${res.red} ${res.green} ${res.blue}",
+        "${tColor.alpha} ${tColor.red} ${tColor.green} ${tColor.blue}");
   });
 }

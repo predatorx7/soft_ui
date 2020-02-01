@@ -20,7 +20,17 @@ import 'package:flutter/widgets.dart';
 // import 'theme_data.dart';
 
 import 'package:flutter/material.dart'
-    show ButtonTheme, InkWell, Material, MaterialButton, MaterialState, MaterialStateProperty, MaterialTapTargetSize, MaterialType, Theme, kThemeChangeDuration;
+    show
+        ButtonTheme,
+        InkWell,
+        Material,
+        MaterialButton,
+        MaterialState,
+        MaterialStateProperty,
+        MaterialTapTargetSize,
+        MaterialType,
+        Theme,
+        kThemeChangeDuration;
 
 /// Creates a button based on [Semantics], [Material], and [InkWell]
 /// widgets.
